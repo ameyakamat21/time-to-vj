@@ -31,3 +31,6 @@ class VideoFile:
 
 		self.height = video_stream["height"]
 		self.width = video_stream["width"]
+
+	def stream(self) -> ffmpeg.node:
+		return ffmpeg.input(self.path)
