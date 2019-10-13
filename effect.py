@@ -4,18 +4,26 @@ from abc import (
 	ABC,
 	abstractmethod
 )
+from dataclasses import dataclass
 
 # External imports
 from ffmpeg.nodes import Stream
 
+# Internal imports
+from video import StreamInfo
+
+@dataclass
 class VideoEffect(ABC):
 	"""
 	Interface for all video effects
 	"""
+	input_stream: StreamInfo = None
+	output_stream: StreamInfo = None
 
-	def __init__(self, input_stream: Stream, output_stream: Stream):
+	def __init__(self, input_stream: StreamInfo):
 		self.input_stream = input_stream
-		self.output_stream = output_stream
+		# Initially, effect is not applied
+		self.output_stream = input_stream
 
 	def set_input(self, input_stream: Stream):
 		"""
@@ -23,25 +31,24 @@ class VideoEffect(ABC):
 		"""
 		self.input_stream = input_stream
 
-	def set_output(self, output_stream: Stream):
+	def get_output(self):
 		"""
 		Set output
 		"""
-		self.output_stream = output_stream
+		return self.output_stream
 
 	@abstractmethod
-	def set_effect(self):
+	def enable_effect(self):
 		"""
 		Connect input -> effect -> output
 		"""
 		raise NotImplementedError
 
-	@abstractmethod
 	def unset_effect(self):
 		"""
 		Connect input -> output (without effect)
 		"""
-		raise NotImplementedError
+		self.output_stream = self.input_stream
 
 
 	@abstractmethod
@@ -50,3 +57,16 @@ class VideoEffect(ABC):
 		What 'intensity' exactly means is TBA
 		"""
 		raise NotImplementedError
+
+	@abstractmethod
+	def set_position(self, position:int = 0):
+		"""
+		What 'position' exactly means is TBA
+		"""
+		raise NotImplementedError
+
+	def set_next_effect(self, next_effect: "VideoEffect"):
+		"""
+		Connect next effect in chain
+		"""
+		next_effect.set_input(self.output_stream)

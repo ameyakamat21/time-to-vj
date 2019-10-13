@@ -4,10 +4,38 @@ from dataclasses import dataclass
 import ffmpeg
 
 @dataclass
+class StreamInfo:
+	raw_stream 	: ffmpeg.nodes.Stream = None
+	width 		: int = 0
+	height 		: int = 0
+
+	def trim(self, **kwargs):
+		"""
+		:start_frame: <int> frame of start of trim
+		:end_frame: <int> frame of end of trim
+		"""
+		self.raw_stream = self.raw_stream.trim(**kwargs).setpts("PTS-STARTPTS")
+
+
+	def trimmed_copy(self, **kwargs):
+		"""
+		:start_frame: <int> frame of start of trim
+		:end_frame: <int> frame of end of trim
+		"""
+		return StreamInfo(
+			raw_stream = self.raw_stream.trim(**kwargs).setpts("PTS-STARTPTS"),
+			width=self.width,
+			height=self.height
+		)
+
+	
+@dataclass
 class VideoFile:
-	path: str
-	width: int
-	height: int
+	path 		: str
+	width 		: int
+	height 		: int
+	stream 		: ffmpeg.nodes.Stream
+	stream_info	: StreamInfo
 
 	def __init__(self, path: str):
 		self.path = path
@@ -29,8 +57,9 @@ class VideoFile:
 
 		video_stream = video_stream_list[0]
 
-		self.height = video_stream["height"]
-		self.width = video_stream["width"]
+		self.height 		= video_stream["height"]
+		self.width 			= video_stream["width"]
+		self.stream 		= ffmpeg.input(path)
+		self.stream_info 	= StreamInfo(raw_stream=self.stream, width=self.width, height=self.height)
 
-	def stream(self) -> ffmpeg.node:
-		return ffmpeg.input(self.path)
+		
