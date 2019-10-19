@@ -198,9 +198,68 @@ final_raw_stream.run()
 # Using VideoEffect local library!
 # bike_1.trimmed_copy(start_frame=0, end_frame=500)
 
-zat = ZoomAndTranslate(input_stream = bike_1.trimmed_copy(start_frame=0, end_frame=500))
+zat = ZoomAndTranslate(input_stream = bike_1.trimmed_copy(start_frame=100, end_frame=300))
 zat.enable_effect()
 zat.set_position(0)
 output_stream = zat.output_stream
-output_stream.raw_stream.output(outpath("video-effect-2.mp4")).run()
+output_stream.raw_stream.output(outpath("trimmed-copy-2.mp4")).run()
+
+# Try specifying time instead of frame number
+
+zat = ZoomAndTranslate(input_stream = bike_1.trimmed_copy(start=10, end=20.33333))
+zat.enable_effect()
+zat.set_position(0)
+output_stream = zat.output_stream
+output_stream.raw_stream.output(outpath("timed-trim-1.mp4")).run()
+
+# Introducing the bi-player
+
+# Crop
+bot_stream = (
+	bike_1.
+	trimmed_copy(start=10, end=20.33333).raw_stream.
+	crop(
+		x=int(bike_1.width/4), 
+		y=0, 
+		width=int(sun_vid.width/2), 
+		height=int(sun_vid.height/2)
+	)
+)
+
+top_stream = (
+	bike_1.
+	trimmed_copy(start=10, end=20.33333).raw_stream.
+	crop(
+		x=int(bike_1.width/4), 
+		y=int(bike_1.height/2), 
+		width=int(sun_vid.width/2), 
+		height=int(sun_vid.height/2)
+	)
+) 
+
+(
+	top_stream.
+		filter_(
+			filter_name = "pad", 
+			width = bike_1.width,
+			height = bike_1.height, 
+			x = int(bike_1.width/4), 
+			y = 0
+		).
+		overlay(
+			overlay_parent_node=bot_stream.split().stream(), 
+			x=int(bike_1.width/4), 
+			y=int(bike_1.height/2)
+		).
+		output(outpath("biplayer-1.mp4")).
+		run()
+)
+
+
+# Seeing what split() does
+zat = ZoomAndTranslate(input_stream = bike_1.trimmed_copy(start=10, end=20.33333))
+zat.enable_effect()
+zat.set_position(0)
+output_stream = zat.output_stream
+output_stream.raw_stream.split().stream().output(outpath("timed-trim-1.mp4")).run()
 

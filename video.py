@@ -8,6 +8,7 @@ class StreamInfo:
 	raw_stream 	: ffmpeg.nodes.Stream = None
 	width 		: int = 0
 	height 		: int = 0
+	duration	: float = 0.0
 
 	def trim(self, **kwargs):
 		"""
@@ -23,7 +24,11 @@ class StreamInfo:
 		:end_frame: <int> frame of end of trim
 		"""
 		return StreamInfo(
-			raw_stream = self.raw_stream.trim(**kwargs).setpts("PTS-STARTPTS"),
+			raw_stream = (
+				self.raw_stream.
+				split().stream().
+				trim(**kwargs).setpts("PTS-STARTPTS")
+			),
 			width=self.width,
 			height=self.height
 		)
@@ -34,8 +39,10 @@ class VideoFile:
 	path 		: str
 	width 		: int
 	height 		: int
+	duration	: float
 	stream 		: ffmpeg.nodes.Stream
 	stream_info	: StreamInfo
+	probe_info	: dict
 
 	def __init__(self, path: str):
 		self.path = path
@@ -47,6 +54,7 @@ class VideoFile:
 				probe_info["streams"]
 			)
 		)
+		self.probe_info = probe_info
 
 		# Raise error if inorrect number of streams
 		if(len(video_stream_list) != 1):
@@ -59,7 +67,13 @@ class VideoFile:
 
 		self.height 		= video_stream["height"]
 		self.width 			= video_stream["width"]
+		self.duration		= video_stream["duration"]
 		self.stream 		= ffmpeg.input(path)
-		self.stream_info 	= StreamInfo(raw_stream=self.stream, width=self.width, height=self.height)
+		self.stream_info 	= StreamInfo(
+			raw_stream=self.stream, 
+			width=self.width, 
+			height=self.height,
+			duration=self.duration
+		)
 
 		
