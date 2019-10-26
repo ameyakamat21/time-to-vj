@@ -12,7 +12,15 @@ from video import (
 	StreamInfo
 )
 
-from zoom_and_translate import ZoomAndTranslate
+from zoom_and_translate import (
+	ZoomAndTranslateFixed,
+	ZoomAndTranslateRelative
+)
+
+
+# Constants #
+IN_VIDEO_DIR 	= "raw-video"
+OUT_VIDEO_DIR	= "processed-video"
 
 INPUT_VIDEO_DIR = "/Users/ameya/side-projects/ffmpeg-video-editing/time-to-vj/raw-video/choreo-selection-1"
 NUM_VIDEOS = 10
@@ -27,6 +35,18 @@ def inpath(video_path):
 def outpath(video_path):
 	return os.path.join(OUT_VIDEO_DIR, video_path)
 
+
+universe_vid = VideoFile(inpath("universe-footage.mp4")).stream_info
+bridge_vid = VideoFile(inpath("wooden-bridge.mp4")).stream_info
+sun_vid = VideoFile(inpath("transit.mov")).stream_info
+
+hector_1 = VideoFile(inpath("hector-vertical-1.mp4")).stream_info
+hector_2 = VideoFile(inpath("hector-vertical-2.mp4")).stream_info
+
+bike_1 = VideoFile(inpath("bike-1.mp4")).stream_info
+bike_2 = VideoFile(inpath("bike-2.mp4")).stream_info
+
+
 def get_splice_times():
 	time_diff_list = []
 	start_time = time()
@@ -40,6 +60,8 @@ def get_splice_times():
 			print("Got quit request.")
 			break
 	return time_diff_list
+
+
 
 video_name_list = ["1.mp4", "8.mp4", "9.mp4", "10.mp4", "12.mp4", "15.mp4", "18.mp4", "19.mp4", "21.mp4", "24.mp4", "30.mp4", "31.mp4", "32.mp4", "36.mp4"]
 input_stream_list = list(
@@ -130,14 +152,13 @@ def timesplice_an_effect(video_stream_info, out_filename):
 	splice_times = get_splice_times()
 	concat_list = []
 	prev_splice_time = 0.0
-
 	for i in range(len(splice_times)):
 		splice_time = splice_times[i]
 		stream_segment = video_stream_info.trimmed_copy(
 				start=prev_splice_time,
 				end=splice_time
 			)
-		zat = ZoomAndTranslate(input_stream = stream_segment)
+		zat = ZoomAndTranslateRelative(input_stream = stream_segment, intensity = 0.8)
 		zat.set_position(i % 9)
 		output_stream = zat.output_stream
 		concat_list.append(
@@ -152,32 +173,9 @@ def timesplice_an_effect(video_stream_info, out_filename):
 		run()
 	)
 
-timesplice_an_effect(bike_1, "effects_timesplicer-1.mp4")
+timesplice_an_effect(bike_1, "effects_timesplicer-5.mp4")
 
 
 
 # Try concating trimmed copiestimesplice_an_effect_2(bike_1, "timesplice-effect-1.mp4")
 
-
-(
-	ffmpeg.
-	concat(
-		*[bike_1.raw_stream.trim(start=0, end=5).setpts("PTS-STARTPTS"),
-		bike_1.raw_stream.trim(start=20, end=25).setpts("PTS-STARTPTS"),
-		bike_1.raw_stream.trim(start=40, end=45).setpts("PTS-STARTPTS")]).
-	drawtext(text="the concatenation", x=100, y=100, fontsize=25).
-	output(outpath("concat-try-4.mp4")).
-	run()
-)
-
-
-(
-	ffmpeg.
-	concat(
-		*[bike_1.raw_stream.split().stream().trim(start=0, end=5).setpts("PTS-STARTPTS"),
-		bike_1.raw_stream.split().stream().trim(start=20, end=25).setpts("PTS-STARTPTS"),
-		bike_1.raw_stream.split().stream().trim(start=40, end=45).setpts("PTS-STARTPTS")]).
-	drawtext(text="the concatenation", x=100, y=100, fontsize=25).
-	output(outpath("concat-try-5.mp4")).
-	run()
-)

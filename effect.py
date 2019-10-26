@@ -37,13 +37,6 @@ class VideoEffect(ABC):
 		"""
 		return self.output_stream
 
-	@abstractmethod
-	def enable_effect(self):
-		"""
-		Connect input -> effect -> output
-		"""
-		raise NotImplementedError
-
 	def unset_effect(self):
 		"""
 		Connect input -> output (without effect)
