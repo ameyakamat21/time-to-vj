@@ -26,7 +26,6 @@ class StreamInfo:
 		return StreamInfo(
 			raw_stream = (
 				self.raw_stream.
-				split().stream().
 				trim(**kwargs).setpts("PTS-STARTPTS")
 			),
 			width=self.width,

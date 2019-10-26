@@ -263,3 +263,8 @@ zat.set_position(0)
 output_stream = zat.output_stream
 output_stream.raw_stream.split().stream().output(outpath("timed-trim-1.mp4")).run()
 
+
+
+# Make a timespliced video with different crops
+
+
