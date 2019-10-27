@@ -17,6 +17,10 @@ from zoom_and_translate import (
 	ZoomAndTranslateRelative
 )
 
+from splice import (
+	SpliceInfo,
+	get_splices_from_input
+)
 
 # Constants #
 IN_VIDEO_DIR 	= "raw-video"
@@ -56,6 +60,23 @@ def get_splice_times():
 		time_diff = time() - start_time
 		time_diff_list.append(time_diff)
 		print("Time diff: {}".format(time_diff))
+		if(inp == "q"):
+			print("Got quit request.")
+			break
+	return time_diff_list
+
+
+def get_splice_time_deltas():
+	time_diff_list = []
+	start_time = time()
+	prev_time = 0
+	while True:
+		# Wait for user input
+		inp = input("enter for next splice time. q to quit.")
+		time_since_start = time() - start_time
+		time_diff_list.append(time_since_start - prev_time)
+		print("Time diff: {}".format(time_since_start - prev_time))
+		prev_time = time_since_start
 		if(inp == "q"):
 			print("Got quit request.")
 			break
@@ -174,6 +195,62 @@ def timesplice_an_effect(video_stream_info, out_filename):
 	)
 
 timesplice_an_effect(bike_1, "effects_timesplicer-5.mp4")
+
+
+def timesplice_an_effect_with_deltas(video_stream_info, out_filename):
+	splice_times = get_splice_time_deltas()
+	concat_list = []
+	prev_splice_time = 0.0
+	for i in range(len(splice_times)):
+		splice_time_delta = splice_times[i]
+		stream_segment = video_stream_info.trimmed_copy(
+				start=prev_splice_time,
+				end=prev_splice_time + splice_time_delta
+			)
+		zat = ZoomAndTranslateRelative(input_stream = stream_segment, intensity = 0)
+		zat.set_position(i % 9)
+		output_stream = zat.output_stream
+		concat_list.append(
+			output_stream.raw_stream
+		)
+		prev_splice_time = prev_splice_time + splice_time_delta + 2
+	# Works!
+	print("Created concat list")
+	(	ffmpeg.
+		concat(*concat_list).
+		output(outpath(out_filename)).
+		run()
+	)
+
+timesplice_an_effect_with_deltas(bike_1, "effects_timesplicer-delta-1.mp4")
+
+# Works
+def timesplice_an_effect(video_stream_info, out_filename):
+	splices = get_splices_from_input()
+	concat_list = []
+	prev_splice_time = 0.0
+	for i in range(len(splices)):
+		splice_time_delta = splices[i].time_delta
+		stream_segment = video_stream_info.trimmed_copy(
+				start=prev_splice_time,
+				end=prev_splice_time + splice_time_delta
+			)
+		zat = ZoomAndTranslateRelative(input_stream = stream_segment, intensity = 0)
+		zat.set_position(i % 9)
+		output_stream = zat.output_stream
+		concat_list.append(
+			output_stream.raw_stream
+		)
+		prev_splice_time = prev_splice_time + splice_time_delta + 2
+	# Works!
+	print("Created concat list")
+	(	ffmpeg.
+		concat(*concat_list).
+		output(outpath(out_filename)).
+		run()
+	)
+
+timesplice_an_effect(bike_1, "effects-splice-1.mp4")
 
 
 
