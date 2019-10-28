@@ -22,6 +22,11 @@ from splice import (
 	get_splices_from_input
 )
 
+from constants import (
+	FINAL_OUTPUT_WIDTH,
+	FINAL_OUTPUT_HEIGHT
+)
+
 # Constants #
 IN_VIDEO_DIR 	= "raw-video"
 OUT_VIDEO_DIR	= "processed-video"

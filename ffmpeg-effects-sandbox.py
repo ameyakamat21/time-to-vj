@@ -10,7 +10,8 @@ from video import (
 	StreamInfo
 )
 
-from zoom_and_translate import ZoomAndTranslate
+from zoom_and_translate import ZoomAndTranslateRelative
+from culeidoscope import Culeidoscope
 
 # Constants #
 IN_VIDEO_DIR 	= "raw-video"
@@ -30,6 +31,7 @@ hector_1 = VideoFile(inpath("hector-vertical-1.mp4")).stream_info
 hector_2 = VideoFile(inpath("hector-vertical-2.mp4")).stream_info
 
 bike_1 = VideoFile(inpath("bike-1.mp4")).stream_info
+bike_1_dup = VideoFile(inpath("bike-1.mp4")).stream_info
 bike_2 = VideoFile(inpath("bike-2.mp4")).stream_info
 
 ###
@@ -198,7 +200,7 @@ final_raw_stream.run()
 # Using VideoEffect local library!
 # bike_1.trimmed_copy(start_frame=0, end_frame=500)
 
-zat = ZoomAndTranslate(input_stream = bike_1.trimmed_copy(start_frame=100, end_frame=300))
+zat = ZoomAndTranslateRelative(input_stream = bike_1.trimmed_copy(start_frame=100, end_frame=300))
 zat.enable_effect()
 zat.set_position(0)
 output_stream = zat.output_stream
@@ -206,7 +208,7 @@ output_stream.raw_stream.output(outpath("trimmed-copy-2.mp4")).run()
 
 # Try specifying time instead of frame number
 
-zat = ZoomAndTranslate(input_stream = bike_1.trimmed_copy(start=10, end=20.33333))
+zat = ZoomAndTranslateRelative(input_stream = bike_1.trimmed_copy(start=10, end=20.33333))
 zat.enable_effect()
 zat.set_position(0)
 output_stream = zat.output_stream
@@ -221,19 +223,19 @@ bot_stream = (
 	crop(
 		x=int(bike_1.width/4), 
 		y=0, 
-		width=int(sun_vid.width/2), 
-		height=int(sun_vid.height/2)
+		width=int(bike_1.width/2), 
+		height=int(bike_1.height/2)
 	)
 )
 
 top_stream = (
-	bike_1.
+	bike_2.
 	trimmed_copy(start=10, end=20.33333).raw_stream.
 	crop(
 		x=int(bike_1.width/4), 
 		y=int(bike_1.height/2), 
-		width=int(sun_vid.width/2), 
-		height=int(sun_vid.height/2)
+		width=int(bike_1.width/2), 
+		height=int(bike_1.height/2)
 	)
 ) 
 
@@ -247,7 +249,7 @@ top_stream = (
 			y = 0
 		).
 		overlay(
-			overlay_parent_node=bot_stream.split().stream(), 
+			overlay_parent_node=bot_stream, 
 			x=int(bike_1.width/4), 
 			y=int(bike_1.height/2)
 		).
@@ -257,14 +259,31 @@ top_stream = (
 
 
 # Seeing what split() does
-zat = ZoomAndTranslate(input_stream = bike_1.trimmed_copy(start=10, end=20.33333))
-zat.enable_effect()
+zat = ZoomAndTranslateRelative(input_stream = bike_1.trimmed_copy(start=10, end=20.33333))
 zat.set_position(0)
 output_stream = zat.output_stream
 output_stream.raw_stream.split().stream().output(outpath("timed-trim-1.mp4")).run()
 
 
+# Swaprect
+(
+	bike_1.
+		trimmed_copy(start=10, end=20.33333).raw_stream.
+		filter_(filter_name = "swaprect",
+			w = int(bike_1.width / 2),
+			h = int(bike_1.height / 2),
+			x1 = 0, 
+			y1 = 0,
+			x2 = int(bike_1.width / 2),
+			y2 = int(bike_1.height / 2)
+		).
+		output(outpath("swaprect-1.mp4")).
+		run()
+)
 
-# Make a timespliced video with different crops
+# Culeidoscope
+# Swaprect
 
-
+culeidoscope_bike = Culeidoscope(input_stream = bike_1.trimmed_copy(start=10, end=20))
+culeidoscope_bike.set_position(0)
+culeidoscope_bike.output_stream.raw_stream.output(outpath("culeidoscope-1.mp4")).run()
