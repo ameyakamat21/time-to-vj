@@ -12,16 +12,17 @@ from video import (
 	StreamInfo
 )
 
-from zoom_and_translate import (
+from effect.zoom_and_translate import (
 	ZoomAndTranslateFixed,
 	ZoomAndTranslateRelative
 )
 
-from culeidoscope import RandomCuleidoscope
+from effect.culeidoscope.random_culeidoscope import RandomCuleidoscope
 
 from splice import (
 	SpliceInfo,
-	get_splices_from_input
+	get_splices_from_input,
+	get_splices_from_readchar
 )
 
 from constants import (
@@ -287,7 +288,42 @@ def timesplice_an_effect(video_stream_info, out_filename):
 	
 timesplice_an_effect(bike_1, "culeidoscope-splice-1.mp4")
 
+# Get effect from readchar!
+def timesplice_an_effect_readchar(video_stream_info, out_filename):
+	splices = get_splices_from_readchar()
+	concat_list = []
+	# Maps a effect class name to the effect object, so a single object
+	# can be used
+	effect_map = {}
+	prev_splice_time = 0.0
+	for splice in splices:
+		splice_time_delta = splice.time_delta
+		stream_segment = video_stream_info.trimmed_copy(
+				start=prev_splice_time,
+				end=prev_splice_time + splice_time_delta
+			)
+		# See if effect is already used before
+		if splice.effect in effect_map.keys():
+			effect = effect_map[splice.effect]
+			effect.input_stream = stream_segment
+		else:
+			# Initialize effect class with input stream
+			effect = splice.effect(input_stream = stream_segment)
+			# Store in dict to be used later
+			effect_map[splice.effect] = effect
+		getattr(effect, splice.action)()
+		output_stream = effect.output_stream
+		concat_list.append(
+			output_stream.raw_stream
+		)
+		prev_splice_time = prev_splice_time + splice_time_delta
+	
+	print("Created concat list")
+	(	ffmpeg.
+		concat(*concat_list).
+		output(outpath(out_filename)).
+		run()
+	)
 
-
-# Try concating trimmed copiestimesplice_an_effect_2(bike_1, "timesplice-effect-1.mp4")
+timesplice_an_effect_readchar(bike_1, "multiplying_vertical_culeido-2.mp4")
 

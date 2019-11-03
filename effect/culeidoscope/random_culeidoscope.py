@@ -73,3 +73,6 @@ class RandomCuleidoscope(VideoEffect):
 			width=self.input_stream.width,
 			height=self.input_stream.height
 		)
+
+	def next_effect(self):
+		return self.set_effect_params(0)

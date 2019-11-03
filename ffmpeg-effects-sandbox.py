@@ -293,3 +293,5 @@ culeidoscope_bike.output_stream.raw_stream.output(outpath("RandomCuleidoscope-3.
 vculeidoscope_bike = VerticalCuleidoscope(input_stream = bike_1.trimmed_copy(start=0, end=10))
 vculeidoscope_bike.set_effect_params(vband_width_ratio=0.2, vband_spacing_ratio=0.2)
 vculeidoscope_bike.output_stream.raw_stream.output(outpath("vculeidoscope.mp4")).run()
+
+# test getattr
