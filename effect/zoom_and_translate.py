@@ -7,7 +7,7 @@ from math import (
 from ffmpeg.nodes import Stream
 
 # Local library
-from effect import VideoEffect
+from effect.effect import VideoEffect
 from video import StreamInfo
 
 class ZoomAndTranslateFixed(VideoEffect):
@@ -19,7 +19,7 @@ class ZoomAndTranslateFixed(VideoEffect):
 		# TBA for now
 		pass
 
-	def set_position(self, position:int = 0):
+	def set_effect_params(self, position:int = 0):
 		"""
 		Chooses one of 9 positions: 0-8
 		"""
@@ -71,7 +71,7 @@ class ZoomAndTranslateRelative(VideoEffect):
 		y_topleft = center_y - (height/2) / zoom_level
 
 
-	def set_position(self, position:int = 0):
+	def set_effect_params(self, position:int = 0):
 		"""
 		Chooses one of 9 positions: 0-8
 		"""

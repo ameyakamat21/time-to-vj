@@ -6,11 +6,11 @@ from random import randint
 from ffmpeg.nodes import Stream
 
 # Local library
-from effect import VideoEffect
+from effect.effect import VideoEffect
 from video import StreamInfo
 from utils import Rectangle
 
-class Culeidoscope(VideoEffect):
+class RandomCuleidoscope(VideoEffect):
 	"""
 	Rectangular kaleidoscope
 	"""
@@ -25,14 +25,14 @@ class Culeidoscope(VideoEffect):
 		# TBA for now
 		pass
 
-	def set_position(self, position:int = 0):
+	def set_effect_params(self, position:int = 0):
 		"""
 		Description TBA
 		"""
 		# divisions along the horizontal plane
-		num_x_divisions = 4
+		num_x_divisions = 8
 		# divisions along the vertical plane
-		num_y_divisions = 2
+		num_y_divisions = 6
 
 		cell_width = self.input_stream.width / num_x_divisions
 		cell_height = self.input_stream.height / num_y_divisions

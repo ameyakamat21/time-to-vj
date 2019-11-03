@@ -17,6 +17,8 @@ from zoom_and_translate import (
 	ZoomAndTranslateRelative
 )
 
+from culeidoscope import RandomCuleidoscope
+
 from splice import (
 	SpliceInfo,
 	get_splices_from_input
@@ -185,7 +187,7 @@ def timesplice_an_effect(video_stream_info, out_filename):
 				end=splice_time
 			)
 		zat = ZoomAndTranslateRelative(input_stream = stream_segment, intensity = 0.8)
-		zat.set_position(i % 9)
+		zat.set_effect_params(i % 9)
 		output_stream = zat.output_stream
 		concat_list.append(
 			output_stream.raw_stream
@@ -213,7 +215,7 @@ def timesplice_an_effect_with_deltas(video_stream_info, out_filename):
 				end=prev_splice_time + splice_time_delta
 			)
 		zat = ZoomAndTranslateRelative(input_stream = stream_segment, intensity = 0)
-		zat.set_position(i % 9)
+		zat.set_effect_params(i % 9)
 		output_stream = zat.output_stream
 		concat_list.append(
 			output_stream.raw_stream
@@ -241,7 +243,7 @@ def timesplice_an_effect(video_stream_info, out_filename):
 				end=prev_splice_time + splice_time_delta
 			)
 		zat = ZoomAndTranslateRelative(input_stream = stream_segment, intensity = 0)
-		zat.set_position(i % 9)
+		zat.set_effect_params(i % 9)
 		output_stream = zat.output_stream
 		concat_list.append(
 			output_stream.raw_stream
@@ -256,6 +258,34 @@ def timesplice_an_effect(video_stream_info, out_filename):
 	)
 
 timesplice_an_effect(bike_1, "effects-splice-1.mp4")
+
+# Culeidoscope timesplice
+def timesplice_an_effect(video_stream_info, out_filename):
+	splices = get_splices_from_input()
+	concat_list = []
+	prev_splice_time = 0.0
+	for i in range(len(splices)):
+		splice_time_delta = splices[i].time_delta
+		stream_segment = video_stream_info.trimmed_copy(
+				start=prev_splice_time,
+				end=prev_splice_time + splice_time_delta
+			)
+		cul = RandomCuleidoscope(input_stream = stream_segment)
+		cul.set_effect_params(i % 9)
+		output_stream = cul.output_stream
+		concat_list.append(
+			output_stream.raw_stream
+		)
+		prev_splice_time = prev_splice_time + splice_time_delta
+	# Works!
+	print("Created concat list")
+	(	ffmpeg.
+		concat(*concat_list).
+		output(outpath(out_filename)).
+		run()
+	)
+	
+timesplice_an_effect(bike_1, "culeidoscope-splice-1.mp4")
 
 
 

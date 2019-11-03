@@ -25,26 +25,12 @@ class VideoEffect(ABC):
 		# Initially, effect is not applied
 		self.output_stream = input_stream
 
-	def set_input(self, input_stream: Stream):
-		"""
-		Set input
-		"""
-		self.input_stream = input_stream
-
-	def get_output(self):
-		"""
-		Set output
-		"""
-		return self.output_stream
-
 	def unset_effect(self):
 		"""
 		Connect input -> output (without effect)
 		"""
 		self.output_stream = self.input_stream
 
-
-	@abstractmethod
 	def set_intensity(self, intensity: int):
 		"""
 		What 'intensity' exactly means is TBA
@@ -52,14 +38,20 @@ class VideoEffect(ABC):
 		raise NotImplementedError
 
 	@abstractmethod
-	def set_position(self, position:int = 0):
+	def set_effect_params(self, **kwargs):
 		"""
 		What 'position' exactly means is TBA
 		"""
 		raise NotImplementedError
 
-	def set_next_effect(self, next_effect: "VideoEffect"):
-		"""
-		Connect next effect in chain
-		"""
-		next_effect.set_input(self.output_stream)
+	def kick_drum_effect(self, **kwargs):
+		raise NotImplementedError
+
+	def snare_drum_effect(self, **kwargs):
+		raise NotImplementedError
+
+	def hihat_drum_effect(self, **kwargs):
+		raise NotImplementedError
+
+	def next_effect(self, **kwargs):
+		raise NotImplementedError
