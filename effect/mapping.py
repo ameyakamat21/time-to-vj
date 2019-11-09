@@ -17,7 +17,7 @@ character_effect_map = {
 
 character_action_map = {
 	"n": "next_effect",
-	"k": "kick_drum_effect",
-	"s": "snare_drum_effect",
-	"h": "hihat_drum_effect"
+	"1": "kick_drum_effect",
+	"0": "snare_drum_effect",
+	"4": "hihat_drum_effect"
 }

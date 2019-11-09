@@ -325,5 +325,5 @@ def timesplice_an_effect_readchar(video_stream_info, out_filename):
 		run()
 	)
 
-timesplice_an_effect_readchar(bike_1, "multiplying_vertical_culeido-2.mp4")
+timesplice_an_effect_readchar(bike_1, "drum-effects-2.mp4")
 

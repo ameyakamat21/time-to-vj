@@ -18,7 +18,7 @@ from effect.culeidoscope.random_culeidoscope import RandomCuleidoscope
 from readchar import readchar
 
 # Constants
-DEFAULT_ACTION = "next_effect"
+DEFAULT_ACTION = "hihat_drum_effect"
 DEFAULT_EFFECT = VerticalCuleidoscope
 
 @dataclass
