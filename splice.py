@@ -13,13 +13,16 @@ from effect.mapping import (
 
 from effect.culeidoscope.vertical_culeidoscope import VerticalCuleidoscope
 from effect.culeidoscope.random_culeidoscope import RandomCuleidoscope
+from effect.pass_through import PassThrough
 
 # External libraries
 from readchar import readchar
 
 # Constants
 DEFAULT_ACTION = "hihat_drum_effect"
-DEFAULT_EFFECT = VerticalCuleidoscope
+DEFAULT_EFFECT = PassThrough
+
+TIME_JUMP_CHAR = "t"
 
 @dataclass
 class SpliceInfo():
@@ -27,8 +30,13 @@ class SpliceInfo():
 	effect_config: str = None
 	effect: VideoEffect = None
 	action: str = "next_effect"
+	time_jump: bool = False
+
 	def __str__(self):
-		return "Splice<{}, {}>".format(self.time_delta, self.effect_config)
+		return "Splice<{}, {}, jump={}>".format(self.time_delta, self.effect, self.time_jump)
+
+	def __repr__(self):
+		return str(self)
 
 
 def get_splices_from_input():
@@ -59,6 +67,7 @@ def get_splices_from_readchar():
 
 	current_effect = DEFAULT_EFFECT
 	current_action = DEFAULT_ACTION
+	print("Enter video splice data:")
 	while True:
 		# Wait for user input
 		inp = readchar()
@@ -71,10 +80,11 @@ def get_splices_from_readchar():
 			current_action = character_action_map[inp]
 
 		splice_info = SpliceInfo(
-			time_delta=time_since_start - prev_time,
-			effect_config=inp,
-			effect=current_effect,
-			action=current_action
+			time_delta = time_since_start - prev_time,
+			effect_config = inp,
+			effect = current_effect,
+			action = current_action,
+			time_jump = inp == TIME_JUMP_CHAR
 		)
 		splice_info_list.append(splice_info)
 		print("Time diff: {}".format(time_since_start - prev_time))
@@ -82,5 +92,6 @@ def get_splices_from_readchar():
 		if(inp == "q"):
 			print("Got quit request.")
 			break
+	print("Splice list: {}", splice_info_list)
 	return splice_info_list
 

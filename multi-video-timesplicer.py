@@ -1,5 +1,6 @@
 # Core python #
 import os
+import sys
 from time import time
 from math import floor
 
@@ -18,7 +19,7 @@ from effect.zoom_and_translate import (
 )
 
 from effect.culeidoscope.random_culeidoscope import RandomCuleidoscope
-
+from effect.pass_through import PassThrough
 from splice import (
 	SpliceInfo,
 	get_splices_from_input,
@@ -177,34 +178,6 @@ def video_matrix():
 	overlay_filt.output(outpath("salsa-simultaneous-2.mp4")).run()
 
 
-def timesplice_an_effect(video_stream_info, out_filename):
-	splice_times = get_splice_times()
-	concat_list = []
-	prev_splice_time = 0.0
-	for i in range(len(splice_times)):
-		splice_time = splice_times[i]
-		stream_segment = video_stream_info.trimmed_copy(
-				start=prev_splice_time,
-				end=splice_time
-			)
-		zat = ZoomAndTranslateRelative(input_stream = stream_segment, intensity = 0.8)
-		zat.set_effect_params(i % 9)
-		output_stream = zat.output_stream
-		concat_list.append(
-			output_stream.raw_stream
-		)
-		prev_splice_time = splice_time
-	# Works!
-	print("Created concat list")
-	(	ffmpeg.
-		concat(*concat_list).
-		output(outpath(out_filename)).
-		run()
-	)
-
-timesplice_an_effect(bike_1, "effects_timesplicer-5.mp4")
-
-
 def timesplice_an_effect_with_deltas(video_stream_info, out_filename):
 	splice_times = get_splice_time_deltas()
 	concat_list = []
@@ -216,7 +189,7 @@ def timesplice_an_effect_with_deltas(video_stream_info, out_filename):
 				end=prev_splice_time + splice_time_delta
 			)
 		zat = ZoomAndTranslateRelative(input_stream = stream_segment, intensity = 0)
-		zat.set_effect_params(i % 9)
+		zat.set_effect_params((i % 3) - 1, (i / 3) - 1)
 		output_stream = zat.output_stream
 		concat_list.append(
 			output_stream.raw_stream
@@ -230,7 +203,7 @@ def timesplice_an_effect_with_deltas(video_stream_info, out_filename):
 		run()
 	)
 
-timesplice_an_effect_with_deltas(bike_1, "effects_timesplicer-delta-1.mp4")
+# timesplice_an_effect_with_deltas(bike_1, "effects_timesplicer-delta-1.mp4")
 
 # Works
 def timesplice_an_effect(video_stream_info, out_filename):
@@ -258,7 +231,7 @@ def timesplice_an_effect(video_stream_info, out_filename):
 		run()
 	)
 
-timesplice_an_effect(bike_1, "effects-splice-1.mp4")
+# timesplice_an_effect(bike_1, "effects-splice-1.mp4")
 
 # Culeidoscope timesplice
 def timesplice_an_effect(video_stream_info, out_filename):
@@ -286,7 +259,7 @@ def timesplice_an_effect(video_stream_info, out_filename):
 		run()
 	)
 	
-timesplice_an_effect(bike_1, "culeidoscope-splice-1.mp4")
+# timesplice_an_effect(bike_1, "culeidoscope-splice-1.mp4")
 
 # Get effect from readchar!
 def timesplice_an_effect_readchar(video_stream_info, out_filename):
@@ -311,12 +284,20 @@ def timesplice_an_effect_readchar(video_stream_info, out_filename):
 			effect = splice.effect(input_stream = stream_segment)
 			# Store in dict to be used later
 			effect_map[splice.effect] = effect
+		print("Applying {} -> {} from {} to {}".format(
+			effect,
+			splice.action,
+			prev_splice_time, 
+			prev_splice_time + splice_time_delta
+			)
+		)
 		getattr(effect, splice.action)()
 		output_stream = effect.output_stream
 		concat_list.append(
 			output_stream.raw_stream
 		)
-		prev_splice_time = prev_splice_time + splice_time_delta
+		time_jump = 1 if splice.time_jump else 0
+		prev_splice_time = prev_splice_time + splice_time_delta + time_jump
 	
 	print("Created concat list")
 	(	ffmpeg.
@@ -325,5 +306,10 @@ def timesplice_an_effect_readchar(video_stream_info, out_filename):
 		run()
 	)
 
-timesplice_an_effect_readchar(bike_1, "drum-effects-2.mp4")
+if len(sys.argv) != 2:
+	print("Usage: python3 <prog-name> <out-file-name.mp4>")	
+	exit(1)
+
+file_name = sys.argv[1]
+timesplice_an_effect_readchar(bike_1, file_name)
 

@@ -71,18 +71,17 @@ class ZoomAndTranslateRelative(VideoEffect):
 		y_topleft = center_y - (height/2) / zoom_level
 
 
-	def set_effect_params(self, position:int = 0):
+	def set_effect_params(self, x_direction, y_direction):
 		"""
-		Chooses one of 9 positions: 0-8
+		:x_direction: x Direction to move the frame from the center. In the range (-1, 1)
+		:y_direction: y Direction to move the frame from the center. In the range (-1, 1)
 		"""
-		# Ensure position is in the range 0-8
-		position 	= floor(abs(position)) % 9
-
+	
 		# The following variables define the center x,y coordinates of the cropped section
 
 		# direction values are -1, 0 or 1
-		x_direction = floor(position / 3) - 1
-		y_direction = floor(position % 3) - 1
+		# x_direction = floor(position / 3) - 1
+		# y_direction = floor(position % 3) - 1
 
 		x_magnitude = (self.input_stream.width/8) * self.intensity
 		y_magnitude = (self.input_stream.height/8) * self.intensity

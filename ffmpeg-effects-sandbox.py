@@ -14,6 +14,8 @@ from effect.zoom_and_translate import ZoomAndTranslateRelative
 from effect.culeidoscope.random_culeidoscope import RandomCuleidoscope
 from effect.culeidoscope.vertical_culeidoscope import VerticalCuleidoscope
 
+from effect.pass_through import PassThrough
+
 # Constants #
 IN_VIDEO_DIR 	= "raw-video"
 OUT_VIDEO_DIR	= "processed-video"
@@ -203,7 +205,7 @@ final_raw_stream.run()
 
 zat = ZoomAndTranslateRelative(input_stream = bike_1.trimmed_copy(start_frame=100, end_frame=300))
 zat.enable_effect()
-zat.set_effect_params(0)
+zat.set_effect_params(-1, 1)
 output_stream = zat.output_stream
 output_stream.raw_stream.output(outpath("trimmed-copy-2.mp4")).run()
 
@@ -211,7 +213,7 @@ output_stream.raw_stream.output(outpath("trimmed-copy-2.mp4")).run()
 
 zat = ZoomAndTranslateRelative(input_stream = bike_1.trimmed_copy(start=10, end=20.33333))
 zat.enable_effect()
-zat.set_effect_params(0)
+zat.set_effect_params(1, 0)
 output_stream = zat.output_stream
 output_stream.raw_stream.output(outpath("timed-trim-1.mp4")).run()
 
@@ -261,7 +263,7 @@ top_stream = (
 
 # Seeing what split() does
 zat = ZoomAndTranslateRelative(input_stream = bike_1.trimmed_copy(start=10, end=20.33333))
-zat.set_effect_params(0)
+zat.set_effect_params(0, 1)
 output_stream = zat.output_stream
 output_stream.raw_stream.split().stream().output(outpath("timed-trim-1.mp4")).run()
 
@@ -292,6 +294,30 @@ culeidoscope_bike.output_stream.raw_stream.output(outpath("RandomCuleidoscope-3.
 
 vculeidoscope_bike = VerticalCuleidoscope(input_stream = bike_1.trimmed_copy(start=0, end=10))
 vculeidoscope_bike.set_effect_params(vband_width_ratio=0.2, vband_spacing_ratio=0.2)
-vculeidoscope_bike.output_stream.raw_stream.output(outpath("vculeidoscope.mp4")).run()
+vculeidoscope_bike.output_stream.raw_stream.output(outpath("vculeidoscope-1.mp4")).run()
 
-# test getattr
+# Test pass through
+pt_bike = PassThrough(input_stream = bike_1.trimmed_copy(start = 0, end = 10))
+pt_bike.set_effect_params(ok=1, nok=3)
+pt_bike.output_stream.raw_stream.output(outpath("pt-1.mp4"))
+
+
+pt_1 = PassThrough(input_stream = bike_1.trimmed_copy(start = 0, end = 5))
+pt_2 = PassThrough(input_stream = bike_1.trimmed_copy(start = 6, end = 10))
+pt_3 = PassThrough(input_stream = bike_1.trimmed_copy(start = 11, end = 15))
+
+
+# Test pass though with concat
+# Crop, concat, pad
+(
+	ffmpeg.
+	concat(
+		*[
+		pt_1.output_stream.raw_stream,
+		pt_2.output_stream.raw_stream,
+		pt_3.output_stream.raw_stream
+		]
+	).
+	output(outpath("pt-concat.mp4")).
+	run()
+)
