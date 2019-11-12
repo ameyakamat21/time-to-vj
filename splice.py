@@ -22,15 +22,13 @@ from readchar import readchar
 DEFAULT_ACTION = "hihat_drum_effect"
 DEFAULT_EFFECT = PassThrough
 
-TIME_JUMP_CHAR = "t"
-
 @dataclass
 class SpliceInfo():
 	time_delta: float = 0
 	effect_config: str = None
 	effect: VideoEffect = None
 	action: str = "next_effect"
-	time_jump: bool = False
+	time_jump: float = 0
 
 	def __str__(self):
 		return "Splice<{}, {}, jump={}>".format(self.time_delta, self.effect, self.time_jump)
@@ -60,14 +58,23 @@ def get_splices_from_input():
 			break
 	return splice_info_list
 
+def get_time_jump(inp_char):
+	if inp_char == "t":
+		return 1
+	elif inp_char == "y":
+		return 0.5
+	else:
+		return 0
+
 def get_splices_from_readchar():
 	splice_info_list = []
+	print("Enter video splice data. Enter to start:")
+	input()
 	start_time = time()
 	prev_time = 0
 
 	current_effect = DEFAULT_EFFECT
 	current_action = DEFAULT_ACTION
-	print("Enter video splice data:")
 	while True:
 		# Wait for user input
 		inp = readchar()
@@ -84,7 +91,7 @@ def get_splices_from_readchar():
 			effect_config = inp,
 			effect = current_effect,
 			action = current_action,
-			time_jump = inp == TIME_JUMP_CHAR
+			time_jump = get_time_jump(inp)
 		)
 		splice_info_list.append(splice_info)
 		print("Time diff: {}".format(time_since_start - prev_time))

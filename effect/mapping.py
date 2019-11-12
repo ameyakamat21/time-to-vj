@@ -5,7 +5,7 @@ from effect.culeidoscope.vertical_culeidoscope import (
 	MultiplyingVerticalCuleidoscope
 )
 from effect.culeidoscope.random_culeidoscope import RandomCuleidoscope
-from effect.zoom_and_translate import ZoomAndTranslateRelative
+from effect.zoom_and_translate import ZoomAndTranslateRelativeRectangular
 from effect.pass_through import PassThrough
 
 character_effect_map = {
@@ -13,7 +13,7 @@ character_effect_map = {
 	"w": WideningVerticalCuleidoscope,
 	"m": MultiplyingVerticalCuleidoscope,
 	"r": RandomCuleidoscope,
-	"z": ZoomAndTranslateRelative,
+	"z": ZoomAndTranslateRelativeRectangular,
 	"t": PassThrough
 }
 

@@ -10,7 +10,7 @@ from video import (
 	StreamInfo
 )
 
-from effect.zoom_and_translate import ZoomAndTranslateRelative
+from effect.zoom_and_translate import ZoomAndTranslateRelativeRectangular
 from effect.culeidoscope.random_culeidoscope import RandomCuleidoscope
 from effect.culeidoscope.vertical_culeidoscope import VerticalCuleidoscope
 
@@ -203,7 +203,7 @@ final_raw_stream.run()
 # Using VideoEffect local library!
 # bike_1.trimmed_copy(start_frame=0, end_frame=500)
 
-zat = ZoomAndTranslateRelative(input_stream = bike_1.trimmed_copy(start_frame=100, end_frame=300))
+zat = ZoomAndTranslateRelativeRectangular(input_stream = bike_1.trimmed_copy(start_frame=100, end_frame=300))
 zat.enable_effect()
 zat.set_effect_params(-1, 1)
 output_stream = zat.output_stream
@@ -211,7 +211,7 @@ output_stream.raw_stream.output(outpath("trimmed-copy-2.mp4")).run()
 
 # Try specifying time instead of frame number
 
-zat = ZoomAndTranslateRelative(input_stream = bike_1.trimmed_copy(start=10, end=20.33333))
+zat = ZoomAndTranslateRelativeRectangular(input_stream = bike_1.trimmed_copy(start=10, end=20.33333))
 zat.enable_effect()
 zat.set_effect_params(1, 0)
 output_stream = zat.output_stream
@@ -262,7 +262,7 @@ top_stream = (
 
 
 # Seeing what split() does
-zat = ZoomAndTranslateRelative(input_stream = bike_1.trimmed_copy(start=10, end=20.33333))
+zat = ZoomAndTranslateRelativeRectangular(input_stream = bike_1.trimmed_copy(start=10, end=20.33333))
 zat.set_effect_params(0, 1)
 output_stream = zat.output_stream
 output_stream.raw_stream.split().stream().output(outpath("timed-trim-1.mp4")).run()

@@ -15,7 +15,7 @@ from video import (
 
 from effect.zoom_and_translate import (
 	ZoomAndTranslateFixed,
-	ZoomAndTranslateRelative
+	ZoomAndTranslateRelativeRectangular
 )
 
 from effect.culeidoscope.random_culeidoscope import RandomCuleidoscope
@@ -188,7 +188,7 @@ def timesplice_an_effect_with_deltas(video_stream_info, out_filename):
 				start=prev_splice_time,
 				end=prev_splice_time + splice_time_delta
 			)
-		zat = ZoomAndTranslateRelative(input_stream = stream_segment, intensity = 0)
+		zat = ZoomAndTranslateRelativeRectangular(input_stream = stream_segment, intensity = 0)
 		zat.set_effect_params((i % 3) - 1, (i / 3) - 1)
 		output_stream = zat.output_stream
 		concat_list.append(
@@ -216,7 +216,7 @@ def timesplice_an_effect(video_stream_info, out_filename):
 				start=prev_splice_time,
 				end=prev_splice_time + splice_time_delta
 			)
-		zat = ZoomAndTranslateRelative(input_stream = stream_segment, intensity = 0)
+		zat = ZoomAndTranslateRelativeRectangular(input_stream = stream_segment, intensity = 0)
 		zat.set_effect_params(i % 9)
 		output_stream = zat.output_stream
 		concat_list.append(
@@ -269,39 +269,56 @@ def timesplice_an_effect_readchar(video_stream_info, out_filename):
 	# can be used
 	effect_map = {}
 	prev_splice_time = 0.0
+
+	default_zat_effect = ZoomAndTranslateRelativeRectangular()
 	for splice in splices:
 		splice_time_delta = splice.time_delta
 		stream_segment = video_stream_info.trimmed_copy(
 				start=prev_splice_time,
 				end=prev_splice_time + splice_time_delta
 			)
-		# See if effect is already used before
-		if splice.effect in effect_map.keys():
-			effect = effect_map[splice.effect]
-			effect.input_stream = stream_segment
+
+		default_zat_effect.input_stream = stream_segment
+
+		if splice.effect == ZoomAndTranslateRelativeRectangular:
+			getattr(default_zat_effect, splice.action)()
+			output_stream = default_zat_effect.output_stream
 		else:
-			# Initialize effect class with input stream
-			effect = splice.effect(input_stream = stream_segment)
-			# Store in dict to be used later
-			effect_map[splice.effect] = effect
-		print("Applying {} -> {} from {} to {}".format(
-			effect,
-			splice.action,
-			prev_splice_time, 
-			prev_splice_time + splice_time_delta
+			default_zat_effect.set_previous_effect_params()
+			stream_segment = default_zat_effect.output_stream
+			# See if effect is already used before
+			if splice.effect in effect_map.keys():
+				effect = effect_map[splice.effect]
+				effect.input_stream = stream_segment
+			else:
+				# Initialize effect class with input stream
+				effect = splice.effect(input_stream = stream_segment)
+				# Store in dict to be used later
+				effect_map[splice.effect] = effect
+			print("Applying {} -> {} from {} to {}".format(
+				effect,
+				splice.action,
+				prev_splice_time, 
+				prev_splice_time + splice_time_delta
+				)
 			)
-		)
-		getattr(effect, splice.action)()
-		output_stream = effect.output_stream
+			getattr(effect, splice.action)()
+			output_stream = effect.output_stream
 		concat_list.append(
 			output_stream.raw_stream
 		)
-		time_jump = 1 if splice.time_jump else 0
-		prev_splice_time = prev_splice_time + splice_time_delta + time_jump
+
+		prev_splice_time = prev_splice_time + splice_time_delta + splice.time_jump
 	
 	print("Created concat list")
 	(	ffmpeg.
 		concat(*concat_list).
+		filter_("pad", 
+			width=video_stream_info.width, 
+			height=video_stream_info.height, 
+			x=video_stream_info.width/4, 
+			y=video_stream_info.height/4
+		).
 		output(outpath(out_filename)).
 		run()
 	)
